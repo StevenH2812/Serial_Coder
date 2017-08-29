@@ -11,15 +11,31 @@
 #include <Arduino.h>
 
 
-#define MAX_MESSAGE 5
+#define MAX_MESSAGE 10
+#define IN_MESSAGE_SIZE 4
+#define OUT_MESSAGE_SIZE 7
 #define END_MARKER 255
 #define SPECIAL_BYTE 253
 #define START_MARKER 254
-#define MESSAGES 3
+#define IN_MESSAGES 3
+#define OUT_MESSAGES 1
 
-struct Message{
-	uint8_t type;
-	byte msg[MAX_MESSAGE];
+// Message in types
+#define VX 0
+#define VY 1
+#define Z 2
+
+// Message out types
+#define R 0
+
+struct MessageIn{
+	byte type;
+	byte msg[IN_MESSAGE_SIZE];
+};
+
+struct MessageOut{
+	byte type;
+	byte msg[OUT_MESSAGE_SIZE];
 };
 
 /**
@@ -32,14 +48,26 @@ class SerialCoderClass{
 
 public:
 	SerialCoderClass();
-	static void testFun();
+	static void getSerialData();
+	static void processData();
+	static void decodeHighBytes();
+
+	static float receiveFloat(byte msgtype);
+
+
+	static void sendFloat(byte msgtype, float outfloat);
+	static void encodeHighBytes(byte* sendData, uint8_t msgSize);
+
+	static void checkBigEndian();
+
+
 
 protected:
 	static byte _bytesRecvd;
 	static byte _dataSentNum;
 	static byte _dataRecvCount;
 
-	static byte _dataRecvvd[MAX_MESSAGE];
+	//static byte _dataRecvd[MAX_MESSAGE];
 	static byte _dataSend[MAX_MESSAGE];
 	static byte _tempBuffer[MAX_MESSAGE];
 
@@ -50,7 +78,12 @@ protected:
 	static boolean _startFound;
 	static boolean _allReceived;
 
-	Message messages[MESSAGES];
+	static MessageIn _receiveMessages[IN_MESSAGES];
+	static MessageOut _sendMessages[OUT_MESSAGES];
+
+	static byte _varByte;
+
+	static boolean _bigEndian;
 
 };
 
