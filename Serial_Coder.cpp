@@ -48,6 +48,8 @@ SerialCoderClass::SerialCoderClass(){
 void SerialCoderClass::getSerialData(){
 	if (Serial.available()>0){
 		_varByte = Serial.read();
+		//Serial.print(F("read character is: "));
+		//Serial.println(_varByte);
 		if (_varByte == START_MARKER){
 			_bytesRecvd = 0;
 			_inProgress = true;
@@ -85,6 +87,8 @@ void SerialCoderClass::decodeHighBytes(){
 			_varByte = _varByte + _tempBuffer[i];
 		}
 		_receiveMessages[msgType].msg[_dataRecvCount] = _varByte;
+		//Serial.print(F("Stored character is: "));
+		//Serial.println(_varByte);
 		_dataRecvCount++;
 	}
 }
