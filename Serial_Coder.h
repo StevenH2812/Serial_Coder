@@ -9,40 +9,21 @@
 #define SERIAL_CODER_H_
 
 #include <Arduino.h>
-//#include "ConnectedRanging.h"
+#include <Stream.h>
 
+#define FLOAT_SIZE 4
 
-#define MAX_MESSAGE 10
-#define IN_MESSAGE_SIZE 4
-#define OUT_MESSAGE_SIZE 7
+#define MAX_MESSAGE 20
 #define END_MARKER 255
 #define SPECIAL_BYTE 253
 #define START_MARKER 254
-#define IN_MESSAGES 3
-#define OUT_MESSAGES 1
+#define MESSAGES_IN 10
 
-//#define STATE_SIZE 3
 
-// Message in types
-#define VX 0
-#define VY 1
-#define Z 2
-#define R 3
 
-/*
-struct MessageIn{
-	byte type;
-	byte msg[IN_MESSAGE_SIZE];
-};*/
 
-/*
-struct selfState{
-	float vx;
-	float vy;
-	float z;
-	boolean updated[STATE_SIZE];
-};
-*/
+
+
 
 /**
  * This class is used for encoding, decoding, sending, and receiving messages that will be sent over Arduino's serial communication.
@@ -53,52 +34,63 @@ struct selfState{
 class SerialCoderClass{
 
 public:
-	SerialCoderClass();
-	static void getSerialData();
-	static void processData();
-	static void decodeHighBytes();
-
-	static float receiveFloat(byte msgtype);
 
 
-	static void sendFloat(byte msgfrom, byte msgtype, float outfloat);
-	static void encodeHighBytes(byte* sendData, uint8_t msgSize);
+	SerialCoderClass(byte thisaddress, Stream &myStream) : _address(thisaddress), _myStream(&myStream) {}
+	SerialCoderClass(byte thisaddress, Stream *myStream) : _address(thisaddress), _myStream(myStream) {}
+
+	void setSoftwareSerial(boolean setsoft);
+	void getSerialData();
+	void processData();
+	void decodeHighBytes();
+
+	float receiveFloat(byte msgtype);
 
 
-	static void attachStateHandle(void (* handleNewSelfState)(void)) { _handleNewSelfState = handleNewSelfState; };
-	static void updateStateVar(byte msgFrom,byte msgType);
-	static boolean stateUpdated();
+	void sendFloat(byte msgfrom, byte msgtype, float outfloat);
+	void sendBytes(byte msgto, byte msgtype, byte* tosend, byte n);
+
+	void encodeHighBytes(byte* sendData, uint8_t msgSize);
+
+	void attachMessageHandler(void (* handleMessage)(byte *message, byte n),uint8_t msgtype){_messageHandlers[msgtype] = handleMessage;}
+
 
 
 
 protected:
-	static byte _bytesRecvd;
-	static byte _dataSentNum;
-	static byte _dataRecvCount;
+	byte _bytesRecvd;
+	byte _dataSentNum;
+	byte _dataRecvCount;
 
 	//static byte _dataRecvd[MAX_MESSAGE];
-	static byte _dataSend[MAX_MESSAGE];
-	static byte _tempBuffer[MAX_MESSAGE];
-	static byte _recvBuffer[FLOAT_SIZE];
+	byte _dataSend[MAX_MESSAGE*2];
+	byte _tempBuffer[MAX_MESSAGE*2];
+	byte _recvBuffer[MAX_MESSAGE*2];
 
-	static byte _dataSendCount;
-	static byte _dataTotalSend;
+	byte _dataSendCount;
+	byte _dataTotalSend;
 
-	static boolean _inProgress;
-	static boolean _startFound;
-	static boolean _allReceived;
-
-	static MessageIn _receiveMessages[IN_MESSAGES];
-	static selfState _selfState;
-
-	static byte _varByte;
+	boolean _inProgress;
+	boolean _startFound;
+	boolean _allReceived;
 
 
-	// Handlers
-	static void (* _handleNewSelfState)(void);
+	byte _varByte;
+	byte _varByte2;
+
+	byte _address = 0;
+
+	byte _inmessages;
+
+	boolean _softwareSerialBool = false;
+
+	Stream *_myStream;
+
+
+	void (*_messageHandlers[MESSAGES_IN])(byte *message,byte n);
 
 };
 
-extern SerialCoderClass SerialCoder;
+//extern SerialCoderClass SerialCoder;
 
 #endif /* SERIAL_CODER_H_ */
