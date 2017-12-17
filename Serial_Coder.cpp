@@ -33,7 +33,6 @@ void SerialCoderClass::getSerialData(){
 		if (_varByte == END_MARKER){
 			//Serial.println("end marker");
 			_inProgress = false;
-			_allReceived = true;
 
 			decodeHighBytes();
 		}

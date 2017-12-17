@@ -17,7 +17,7 @@
 #define END_MARKER 255
 #define SPECIAL_BYTE 253
 #define START_MARKER 254
-#define MESSAGES_IN 10
+#define MESSAGES_IN 30
 
 
 
@@ -54,6 +54,8 @@ public:
 
 	void attachMessageHandler(void (* handleMessage)(byte *message, byte n),uint8_t msgtype){_messageHandlers[msgtype] = handleMessage;}
 
+	inline boolean isBusy(){return _inProgress;};
+
 
 
 
@@ -72,7 +74,7 @@ protected:
 
 	boolean _inProgress;
 	boolean _startFound;
-	boolean _allReceived;
+	boolean _isBusy;
 
 
 	byte _varByte;
